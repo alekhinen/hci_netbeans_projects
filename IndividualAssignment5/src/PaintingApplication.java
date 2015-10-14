@@ -1,22 +1,130 @@
+
+import java.awt.BasicStroke;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
+import javax.swing.AbstractButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 
+enum Shape {
+    LINE, OVAL, RECT
+}
+
 /**
  *
  * @author nickalekhine
  */
 public class PaintingApplication extends javax.swing.JFrame {
-
+    
+    private int originalX = -1;
+    private int originalY = -1;
+    private int finalX = -1;
+    private int finalY = -1;
+    
+    Shape currentShape = Shape.LINE;
+    int lineThickness = 1;
+    Color currentColor = Color.cyan;
+    
     /**
      * Creates new form PaintingApplication
      */
     public PaintingApplication() {
         initComponents();
+        initDrawingPanel();
+        
+        ShapeComboAction scAction = new ShapeComboAction(this);
+        LineComboAction lcAction = new LineComboAction(this);
+        ColorButtonAction cbAction = new ColorButtonAction(this);
+        ClearButtonAction clbAction = new ClearButtonAction(this);
+        
+        shapeComboBox.addActionListener(scAction);
+        lineComboBox.addActionListener(lcAction);
+        cyanButton.addActionListener(cbAction);
+        orangeButton.addActionListener(cbAction);
+        greenButton.addActionListener(cbAction);
+        clearButton.addActionListener(clbAction);
     }
 
+    private void initDrawingPanel() {
+        final int yShift = 80;
+        
+        drawPanel = new DrawingPanel();
+        
+        drawPanel.setBackground(new java.awt.Color(245, 245, 245));
+        drawPanel.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent evt) {
+                originalX = evt.getX();
+                originalY = evt.getY() + yShift;
+                System.out.print("original x,y: ");
+                System.out.print(originalX);
+                System.out.print(" ");
+                System.out.println(originalY);
+            }
+            public void mouseReleased(MouseEvent evt) {
+                Graphics2D G = (Graphics2D) getGraphics();
+                G.setStroke(new BasicStroke(lineThickness));
+                G.setColor(currentColor);
+                G.setPaint(currentColor);
+                finalX = evt.getX();
+                finalY = evt.getY() + yShift;
+                int xCoord = originalX;
+                int yCoord = originalY;
+                int width = finalX - originalX;
+                int height = finalY - originalY;
+                if (finalX < originalX) {
+                    xCoord = finalX;
+                    width = originalX - finalX;
+                }
+                if (finalY < originalY) {
+                    yCoord = finalY;
+                    height = originalY - finalY;
+                }
+                if (currentShape.equals(Shape.LINE)) {
+                    G.drawLine(originalX, originalY, finalX, finalY);
+                } else if (currentShape.equals(Shape.RECT)) {
+                    G.fillRect(xCoord, yCoord, width, height);
+                } else {
+                    G.fillOval(xCoord, yCoord, width, height);
+                }
+            }
+        });
+        drawPanel.addMouseMotionListener(new MouseMotionAdapter() {
+            public void mouseDragged(MouseEvent evt) {
+                // todo: dynamic shape while drawing? (extra bick cred)
+//                int x=evt.getX();
+//                int y=evt.getY();
+//                java.awt.Graphics G=getGraphics();
+//                G.drawRect(x, y, 1, 1);
+            }
+        });
+        
+        // add the component to the frame to see it!
+        //setContentPane(drawPanel);
+        drawPanel.setLayout(null);
+        getContentPane().add(drawPanel);
+        
+        drawPanel.setLocation(0, 60);
+        drawPanel.setSize(600, 320);
+//        drawPanel.setBounds(0, 60, 600, 400);
+        
+        pack();
+        setVisible(true);
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -26,55 +134,55 @@ public class PaintingApplication extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        buttonGroup1 = new javax.swing.ButtonGroup();
+        colorButtonGroup = new javax.swing.ButtonGroup();
         jPanel1 = new javax.swing.JPanel();
-        jButton1 = new javax.swing.JButton();
-        jComboBox1 = new javax.swing.JComboBox();
+        clearButton = new javax.swing.JButton();
+        shapeComboBox = new javax.swing.JComboBox();
         jLabel1 = new javax.swing.JLabel();
-        jComboBox2 = new javax.swing.JComboBox();
+        lineComboBox = new javax.swing.JComboBox();
         jLabel3 = new javax.swing.JLabel();
-        jRadioButton1 = new javax.swing.JRadioButton();
-        jRadioButton2 = new javax.swing.JRadioButton();
-        jRadioButton3 = new javax.swing.JRadioButton();
+        cyanButton = new javax.swing.JRadioButton();
+        greenButton = new javax.swing.JRadioButton();
+        orangeButton = new javax.swing.JRadioButton();
         jLabel4 = new javax.swing.JLabel();
+        jPanel2 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Painting Application");
-        setMaximumSize(new java.awt.Dimension(1680, 1050));
+        setBackground(new java.awt.Color(215, 215, 215));
         setMinimumSize(new java.awt.Dimension(600, 400));
-        setPreferredSize(new java.awt.Dimension(600, 400));
-        setSize(new java.awt.Dimension(600, 400));
         getContentPane().setLayout(null);
 
         jPanel1.setBackground(new java.awt.Color(51, 51, 51));
         jPanel1.setMaximumSize(new java.awt.Dimension(600, 40));
 
-        jButton1.setText("clear");
+        clearButton.setText("clear");
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Line", "Rectangle", "Oval" }));
+        shapeComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Line", "Rectangle", "Oval" }));
 
         jLabel1.setFont(new java.awt.Font("Futura Std", 0, 13)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(204, 204, 204));
         jLabel1.setText("Selected Shape");
 
-        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "1", "2", "5", "7" }));
+        lineComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "1", "2", "5", "7" }));
 
         jLabel3.setFont(new java.awt.Font("Futura Std", 0, 13)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(204, 204, 204));
         jLabel3.setText("Line Thickness");
 
-        buttonGroup1.add(jRadioButton1);
-        jRadioButton1.setForeground(new java.awt.Color(204, 204, 204));
-        jRadioButton1.setText("Lime");
+        colorButtonGroup.add(cyanButton);
+        cyanButton.setForeground(new java.awt.Color(204, 204, 204));
+        cyanButton.setSelected(true);
+        cyanButton.setLabel("Cyan");
 
-        buttonGroup1.add(jRadioButton2);
-        jRadioButton2.setForeground(new java.awt.Color(204, 204, 204));
-        jRadioButton2.setText("Blue");
+        colorButtonGroup.add(greenButton);
+        greenButton.setForeground(new java.awt.Color(204, 204, 204));
+        greenButton.setLabel("Green");
 
-        buttonGroup1.add(jRadioButton3);
-        jRadioButton3.setForeground(new java.awt.Color(204, 204, 204));
-        jRadioButton3.setText("Orange");
+        colorButtonGroup.add(orangeButton);
+        orangeButton.setForeground(new java.awt.Color(204, 204, 204));
+        orangeButton.setText("Orange");
 
         jLabel4.setFont(new java.awt.Font("Futura Std", 0, 13)); // NOI18N
         jLabel4.setForeground(new java.awt.Color(204, 204, 204));
@@ -88,21 +196,21 @@ public class PaintingApplication extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel1)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(shapeComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel3)
-                    .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(lineComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jRadioButton1)
+                        .addComponent(cyanButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jRadioButton3)
+                        .addComponent(orangeButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jRadioButton2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 87, Short.MAX_VALUE)
-                        .addComponent(jButton1))
+                        .addComponent(greenButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 76, Short.MAX_VALUE)
+                        .addComponent(clearButton))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel4)
                         .addGap(0, 0, Short.MAX_VALUE)))
@@ -119,26 +227,49 @@ public class PaintingApplication extends javax.swing.JFrame {
                             .addComponent(jLabel4))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jRadioButton1)
-                            .addComponent(jRadioButton2)
-                            .addComponent(jRadioButton3)
-                            .addComponent(jButton1)))
+                            .addComponent(lineComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(cyanButton)
+                            .addComponent(greenButton)
+                            .addComponent(orangeButton)
+                            .addComponent(clearButton)))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(shapeComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
+
+        cyanButton.getAccessibleContext().setAccessibleName("Cyan");
+        greenButton.getAccessibleContext().setAccessibleName("Green");
 
         getContentPane().add(jPanel1);
         jPanel1.setBounds(0, 0, 600, 60);
 
+        jPanel2.setBackground(new java.awt.Color(245, 245, 245));
+
         jLabel2.setFont(new java.awt.Font("Futura Std", 0, 13)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(204, 204, 204));
         jLabel2.setText("Nick's Paint App");
-        getContentPane().add(jLabel2);
-        jLabel2.setBounds(10, 350, 91, 20);
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel2)
+                .addContainerGap(503, Short.MAX_VALUE))
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addContainerGap(294, Short.MAX_VALUE)
+                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+
+        getContentPane().add(jPanel2);
+        jPanel2.setBounds(0, 60, 600, 320);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -179,17 +310,124 @@ public class PaintingApplication extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.ButtonGroup buttonGroup1;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JComboBox jComboBox1;
-    private javax.swing.JComboBox jComboBox2;
+    private javax.swing.JButton clearButton;
+    private javax.swing.ButtonGroup colorButtonGroup;
+    private javax.swing.JRadioButton cyanButton;
+    private javax.swing.JRadioButton greenButton;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JRadioButton jRadioButton1;
-    private javax.swing.JRadioButton jRadioButton2;
-    private javax.swing.JRadioButton jRadioButton3;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JComboBox lineComboBox;
+    private javax.swing.JRadioButton orangeButton;
+    private javax.swing.JComboBox shapeComboBox;
     // End of variables declaration//GEN-END:variables
+    DrawingPanel drawPanel;
+    
+}
+
+// ---------------------------------
+// MARK: Custom JPanel (For Drawing)
+// ---------------------------------
+
+class DrawingPanel extends javax.swing.JPanel {
+    
+    DrawingPanel() {
+        setPreferredSize(new Dimension(600,320));
+    }
+    
+    @Override
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+    }
+}
+
+// -----------------------------
+// MARK: Custom Action Listeners
+// -----------------------------
+
+class ShapeComboAction implements ActionListener {
+    PaintingApplication app;
+    
+    ShapeComboAction(PaintingApplication app) {
+        this.app = app;
+    }
+    
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        JComboBox cb=(JComboBox)e.getSource();
+        String itemName=(String)cb.getSelectedItem();
+        // TODO: debug
+        System.out.println("Shape Selected: " + itemName);
+        
+        if (itemName.equals("Oval")) {
+            this.app.currentShape = Shape.OVAL;
+        } else if (itemName.equals("Line")) {
+            this.app.currentShape = Shape.LINE;
+        } else {
+            this.app.currentShape = Shape.RECT;
+        }
+    }
+}
+
+
+class LineComboAction implements ActionListener {
+    PaintingApplication app;
+    
+    LineComboAction(PaintingApplication app) {
+        this.app = app;
+    }
+    
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        JComboBox cb=(JComboBox)e.getSource();
+        String itemName=(String)cb.getSelectedItem();
+        // TODO: debug
+        System.out.println("Thickness Selected: " + itemName);
+        this.app.lineThickness = Integer.parseInt(itemName);
+    } 
+}
+
+
+class ColorButtonAction implements ActionListener {
+    PaintingApplication app;
+    
+    ColorButtonAction(PaintingApplication app) {
+        this.app = app;
+    }
+    
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        AbstractButton aButton = (AbstractButton) e.getSource();
+        String itemName = aButton.getText();
+        // TODO: debug
+        System.out.println("Selected: " + itemName);
+        
+        if (itemName.equals("Green")) {
+            this.app.currentColor = Color.green;
+        } else if (itemName.equals("Cyan")) {
+            this.app.currentColor = Color.cyan;
+        } else {
+            this.app.currentColor = Color.orange;
+        }
+    }
+}
+
+
+class ClearButtonAction implements ActionListener {
+    PaintingApplication app;
+    
+    ClearButtonAction(PaintingApplication app) {
+        this.app = app;
+    }
+    
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        // TODO: debug
+        System.out.println("Clear graphics on screen.");
+        this.app.drawPanel.repaint();
+        // TODO: do something to clear graphics.
+    }
 }
